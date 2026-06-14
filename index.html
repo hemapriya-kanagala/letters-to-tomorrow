@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Letters to Tomorrow</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --bg-gradient: linear-gradient(135deg, #0f111a 0%, #1e1b4b 100%);
+        }
+        body {
+            background: var(--bg-gradient);
+            background-attachment: fixed;
+            transition: background 2.5s ease-in-out;
+            font-family: system-ui, -apple-system, sans-serif;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+        /* UI Animations */
+        .fade-in {
+            animation: fadeIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .pulse-glow {
+            animation: pulseGlow 3s infinite alternate;
+        }
+        @keyframes pulseGlow {
+            from { box-shadow: 0 0 10px rgba(245, 158, 11, 0.2); }
+            to { box-shadow: 0 0 25px rgba(245, 158, 11, 0.6); border-color: rgba(251, 191, 36, 0.8); }
+        }
+        /* Paper Texture */
+        .paper-card {
+            background: #fafaf9;
+            color: #292524;
+            box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.5);
+            border: 1px solid #e7e5e4;
+            position: relative;
+        }
+        /* Lanterns */
+        .lantern {
+            position: fixed;
+            bottom: -60px;
+            width: 24px;
+            height: 36px;
+            background: rgba(254, 243, 199, 0.9);
+            border-radius: 6px 6px 3px 3px;
+            box-shadow: 0 0 20px 6px rgba(245, 158, 11, 0.6);
+            animation: floatUp linear infinite;
+            pointer-events: none;
+            z-index: 0;
+        }
+        @keyframes floatUp {
+            0% { transform: translateY(0) rotate(0deg) scale(0.8); opacity: 0; }
+            15% { opacity: 1; }
+            85% { opacity: 1; }
+            100% { transform: translateY(-110vh) rotate(10deg) scale(1.2); opacity: 0; }
+        }
+        /* Scrollbar */
+        .custom-scroll::-webkit-scrollbar { width: 6px; }
+        .custom-scroll::-webkit-scrollbar-track { background: transparent; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.2); border-radius: 10px; }
+    </style>
+</head>
+<body class="text-stone-100 flex flex-col justify-between selection:bg-amber-200 selection:text-stone-900">
+
+    <div>
+        <!-- PERSISTENT HUD NAVIGATION -->
+        <nav id="hud" class="w-full max-w-5xl mx-auto flex justify-between items-center px-4 md:px-6 py-6 hidden relative z-40">
+            <div class="flex gap-3 md:gap-4">
+                <button onclick="confirmExit()" class="text-[10px] md:text-xs font-bold uppercase tracking-wider text-stone-400 hover:text-amber-200 transition-colors focus:outline-none">
+                    Menu
+                </button>
+                <button onclick="confirmRestart()" class="text-[10px] md:text-xs font-bold uppercase tracking-wider text-stone-500 hover:text-rose-400 transition-colors focus:outline-none">
+                    Restart
+                </button>
+            </div>
+            <div class="flex gap-3 md:gap-4 items-center">
+                <button onclick="openHowToPlay()" class="text-[10px] md:text-xs font-bold uppercase tracking-wider text-stone-400 hover:text-amber-200 transition-colors focus:outline-none hidden sm:block">
+                    Help
+                </button>
+                <button onclick="openFAQ()" class="text-[10px] md:text-xs font-bold uppercase tracking-wider text-stone-400 hover:text-amber-200 transition-colors focus:outline-none">
+                    FAQ
+                </button>
+                <button onclick="openReviewBook()" class="text-[10px] md:text-xs font-bold uppercase tracking-wider text-stone-900 bg-amber-400/90 hover:bg-amber-400 px-3 md:px-4 py-2 rounded shadow-lg transition-all focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                    Review Book
+                </button>
+            </div>
+        </nav>
+
+        <!-- MAIN CONTAINER -->
+        <main id="game-container" class="w-full max-w-4xl mx-auto px-6 py-6 flex flex-col justify-center relative z-10">
+            <!-- Dynamic elements loaded here -->
+        </main>
+    </div>
+
+    <!-- ACCESSIBLE MODALS -->
+    <div id="modal-overlay" class="fixed inset-0 bg-stone-950/90 backdrop-blur-sm z-[100] hidden flex items-center justify-center p-4">
+        <div id="modal-content" class="bg-stone-900 border border-stone-800 w-full max-w-2xl p-8 md:p-10 rounded-xl shadow-2xl max-h-[85vh] overflow-y-auto custom-scroll">
+            <!-- Modal injection -->
+        </div>
+    </div>
+
+    <script>
+        /* --- GAME CONTENT --- */
+        const gameData = {
+            acts: [
+                {
+                    id: 1,
+                    time: "Morning Light",
+                    bgVar: "linear-gradient(135deg, #0b0f19 0%, #1e1b4b 100%)", 
+                    letters: [
+                        { id: 'c1', name: 'Sol', theme: 'Wonder', text: "Dear Future Me, Today I missed my bus. At first I was upset. Then I sat on a bench and waited for the next one. While I was sitting there, I noticed things I usually rush past. A dog sleeping in a patch of sunlight. Someone watering flowers. A little boy waving at every passing car. It made me wonder how many good things I have missed because I was trying to get somewhere else. When you read this, I hope you still remember to", options: ["...look up once in a while.", "...leave room for unexpected moments.", "...notice the day you are already living."] },
+                        { id: 'c2', name: 'Theo', theme: 'New Beginnings, Age 28', text: "Dear Future Me, The bakery opened today. For the first hour nobody came. I kept pretending to rearrange the shelves. I kept wondering if I made a mistake. Then someone walked in. I hope when you read this you remember", options: ["...how brave you felt before anyone believed in you.", "...that the first customer mattered more than the hundredth.", "...why you opened the door in the first place."] },
+                        { id: 'c3', name: 'Maya', theme: 'Courage, Age 19', text: "Dear Future Me, Tonight I will sing in front of people. The hardest part is not singing. It is believing I deserve to be heard. If you ever forget again, remember", options: ["...that being heard starts with hearing yourself.", "...how proud you felt after the first note.", "...that fear and courage often arrive together."] },
+                        { id: 'c4', name: 'Jun', theme: 'Influence, Age 42', text: "Dear Future Me, Today, one of my students stayed behind after class. I thought they wanted help with an assignment. Instead, they said something I have not stopped thinking about. They told me, \"You probably do not remember this, but last year you told me I was good at this.\" Then they smiled and left. The strange thing is, I barely remember saying it. It took me less than ten seconds. They carried those words with them for an entire year. I have been thinking about that ever since. How many things do we leave behind without realizing it? A sentence. A compliment. A kindness. A moment that matters far more to someone else than it does to us. If you are reading this, I hope you never forget", options: ["...that small words can stay with people for a very long time.", "...the difference a little encouragement can make.", "...that you matter more than you realize."] }
+                    ],
+                    mysteryAt: 2,
+                    mysteryText: "...If this letter survives..."
+                },
+                {
+                    id: 2,
+                    time: "Midday Sun",
+                    bgVar: "linear-gradient(135deg, #1c0d02 0%, #5c2b07 100%)",
+                    letters: [
+                        { id: 'c5', name: 'Eli', theme: 'Belonging, Age 65', text: "Dear Future Me, Today, a new person came to our community group. He arrived a little late and spent most of the meeting sitting quietly by himself. I remember noticing him glance around the room as conversations started, as if he was trying to decide whether he belonged there at all. After a while, I waved him over and invited him to sit at our table. At first, he barely said a word. He mostly listened while the rest of us talked. But as the evening went on, he started joining in. By the end of the night, he was laughing with everyone else. As people were leaving, he stopped to thank me. He told me he had almost decided not to come because he was worried he would not fit in. I thought about that conversation for a long time afterward. Most of us know what it feels like to walk into a room where everyone seems to know each other already. Most of us know what it feels like to wonder whether there is a place for us. Sometimes belonging does not begin with confidence. Sometimes it begins with someone pulling out a chair and saying, 'Come sit with us.' If you are reading this, I hope you remember", options: ["...that everyone is hoping to feel welcome somewhere.", "...how much difference a simple invitation can make.", "...that belonging often begins with a small act of inclusion."] },
+                        { id: 'c6', name: 'Hema', theme: 'Unexpected Kindness, Age 25', text: "Dear Future Me, When I first arrived in the United States, everything felt unfamiliar. One day, I was struggling to carry heavy luggage up several flights of stairs. Before I could even ask for help, a man I had never met noticed and carried it with me all the way up. A few weeks later, it started raining while I was walking between buildings on campus. One of my professors stopped, handed me her umbrella, and told me to keep it. I tried to give it back, but she smiled and said, 'No, you need it.' Neither of these moments lasted very long. Neither of those people probably remember them now. But I do. What stayed with me was not the luggage or the umbrella. It was the reminder that kindness can appear when you least expect it. Those moments made the world feel a little less intimidating. They made me more willing to ask for help when I needed it and more willing to offer help when I saw someone struggling. Years later, I still carry those moments with me. If you are reading this, I hope you never forget", options: ["...how much a small act of kindness can change someone's day.", "...to be the person who helps when help is needed.", "...that the world is often kinder than it first appears."] },
+                        { id: 'c7', name: 'Noah', theme: 'Time, Age 50', text: "Dear Future Me, Today my daughter asked me to help her move into her first apartment. Most of the afternoon was spent carrying boxes, assembling furniture, and trying to figure out where everything should go. At one point, she laughed and said, 'You still treat me like I'm ten.' I laughed too. But later, driving home, I realized something. The years I thought would last forever somehow became memories. The bedtime stories. The school concerts. The family vacations. The little hand reaching for mine when we crossed the street. I spent so much time waiting for the big moments that I did not always realize the ordinary moments were the big moments. If you are reading this, I hope you remember", options: ["...that the days feel long, but the years move quickly.", "...to be present for the moments that seem ordinary.", "...that some of the best parts of life happen while you are busy living it."] },
+                        { id: 'c11', name: 'Hannah', theme: 'Friendship', text: "Dear Future Me, Today a friend called me just to ask how I was doing. Nothing was wrong. Nothing needed fixing. We talked about ordinary things. After we hung up, I realized how rare it is to feel completely understood. If you are reading this, I hope you still make time for", options: ["...the people who know you best.", "...conversations that go nowhere important.", "...friendships that feel like home."] }
+                    ],
+                    mysteryAt: 2,
+                    mysteryText: "...then the festival survived too..."
+                },
+                {
+                    id: 3,
+                    time: "Afternoon Gold",
+                    bgVar: "linear-gradient(135deg, #2e0f05 0%, #7c2d12 100%)",
+                    letters: [
+                        { id: 'c8', name: 'Priya', theme: 'Uncertainty, Age 23', text: "Dear Future Me, A customer asked me today what I wanted to do with my life. I laughed and gave the answer I usually give, the one that sounds confident enough to end the conversation. The truth is, I am not completely sure. There are still roads I have not taken, dreams I have not decided whether to chase, and versions of myself I have not met yet. For a long time, I thought everyone else knew exactly where they were going. The older I get, the more I suspect most people are simply taking the next step and figuring things out as they go. If you are reading this, I hope you continue", options: ["...taking the next step, even when the whole path is unclear.", "...trusting yourself to figure things out along the way.", "...leaving room for possibilities you cannot yet imagine."] },
+                        { id: 'c9', name: 'The Blue Envelope', theme: 'Historical Tribute', text: "Dear Future Reader, There may come a day when you feel different from the people around you. You may think differently. Dream differently. Notice things that others overlook. For a long time, I thought fitting in was something everyone else seemed to do naturally. What I eventually learned is that some of the most important ideas begin with people who see the world from a different angle. The things that make us feel out of place are sometimes the very things that allow us to contribute something new. If that day comes, I hope you remain", options: ["...unapologetically true to the mind you were given.", "...brave enough to stand alone in your truth.", "...kind to yourself when the world does not understand."], note: "Inspired by Alan Turing, whose curiosity changed the world." },
+                        { id: 'c12', name: 'Mateo', theme: 'Letting Go', text: "Dear Future Me, Today I found a box I had not opened in years. Inside were old tickets, photographs, plans I never followed through on, and notes from versions of myself I barely recognize now. I sat with it for a long time. I thought I would feel sad. Instead, I felt grateful. Those dreams carried me as far as they could, and some of them had already done their job. For the first time, I did not feel like I was leaving them behind. I felt like I was thanking them. If you are reading this, I hope you remember that not everything is meant to be", options: ["...carried forever.", "...finished perfectly.", "...taken with you into every season."] },
+                        { id: 'c13', name: 'Asha', theme: 'Hope', text: "Dear Future Me, Today I planted a tree near the edge of town. The funny thing is, I know it will be years before it becomes what I imagine. Someone else might sit beneath its shade before I ever do. Someone I may never meet. For a moment, that felt strange. Then it felt wonderful. The more I thought about it, the more I realized how many good things in my life began the same way. Someone planted them long before I arrived. The books on the library shelves. The gardens in the town square. A community program started by someone who knew what it felt like to go without. The traditions we gather for every year. None of them were built for one person. They were gifts passed forward. There is something beautiful about beginning a story you may never see finished. If you are reading this, I hope you continue", options: ["...planting things you may never see grow.", "...believing in futures you cannot yet see.", "...making room for what comes next."] }
+                    ],
+                    mysteryAt: 2,
+                    mysteryText: "...and if the festival survived: then people still believe tomorrow matters. If you are reading this, Postmaster, thank you for keeping the chain unbroken. From the Postmaster before you."
+                },
+                {
+                    id: 4,
+                    time: "Sunset Glow",
+                    bgVar: "linear-gradient(135deg, #2e1040 0%, #4c1d95 100%)",
+                    letters: [
+                        { id: 'c10', name: 'The Founder\'s Letter', theme: 'Historical Archive', text: "To the Postmaster working the twilight shift, \n\nPeople often ask why we celebrate the longest day. The answer is simple. Because it ends. That is what makes it precious. The sunset reminds us that every season changes. Every chapter changes. Every person changes. \n\nThe purpose of this festival was never to stop time. It was to help people notice it. And to remind them that tomorrow is a gift nobody receives in advance. \n\nIf you are reading this, then you have safely guided the town's words into the evening. Tomorrow has arrived. Take good care of it.", options: [] }
+                    ],
+                    mysteryAt: 99,
+                    mysteryText: ""
+                }
+            ]
+        };
+
+        /* --- STATE SYSTEM --- */
+        let state = {
+            currentScreen: 'menu',
+            currentAct: 1,
+            completedLetters: [],
+            reviewLog: [],
+            mysteryFragmentsSeen: [],
+            customNote: ''
+        };
+
+        const STORAGE_KEY = 'letters_to_tomorrow_save';
+        let menuLanternInterval = null;
+
+        function init() {
+            const savedState = localStorage.getItem(STORAGE_KEY);
+            if (savedState) {
+                try { state = JSON.parse(savedState); } catch(e) { console.warn("Save file reset."); }
+            }
+            render();
+        }
+
+        function saveState() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        }
+
+        function resetGame() {
+            localStorage.removeItem(STORAGE_KEY);
+            state = { currentScreen: 'menu', currentAct: 1, completedLetters: [], reviewLog: [], mysteryFragmentsSeen: [], customNote: '' };
+            render();
+        }
+
+        /* --- LANTERN LOGIC --- */
+        function createSingleLantern() {
+            const lantern = document.createElement('div');
+            lantern.className = 'lantern';
+            lantern.classList.add('bg-lantern'); 
+            lantern.style.left = `${Math.random() * 90 + 5}vw`;
+            lantern.style.animationDuration = `${Math.random() * 6 + 9}s`;
+            document.body.appendChild(lantern);
+            setTimeout(() => lantern.remove(), 16000);
+        }
+
+        function manageMenuLanterns(enable) {
+            if (enable) {
+                if (!menuLanternInterval) {
+                    for(let i=0; i<5; i++) setTimeout(createSingleLantern, i * 600);
+                    menuLanternInterval = setInterval(createSingleLantern, 3000);
+                }
+            } else {
+                if (menuLanternInterval) {
+                    clearInterval(menuLanternInterval);
+                    menuLanternInterval = null;
+                }
+                document.querySelectorAll('.bg-lantern').forEach(el => {
+                    el.style.opacity = '0';
+                    el.style.transition = 'opacity 2s';
+                    setTimeout(() => el.remove(), 2000);
+                });
+            }
+        }
+
+        function spawnEndingBurst() {
+            for (let i = 0; i < 18; i++) {
+                setTimeout(createSingleLantern, i * 800);
+            }
+        }
+
+        /* --- ROUTING & RENDERING --- */
+        const container = document.getElementById('game-container');
+        const hud = document.getElementById('hud');
+
+        function render() {
+            container.innerHTML = '';
+            
+            const isMenu = state.currentScreen === 'menu';
+            const isEnding = state.currentScreen === 'ending';
+            hud.classList.toggle('hidden', isMenu || isEnding);
+
+            if (isMenu) {
+                manageMenuLanterns(true);
+                document.documentElement.style.setProperty('--bg-gradient', 'linear-gradient(135deg, #0f111a 0%, #1e1b4b 100%)');
+            } else {
+                manageMenuLanterns(false);
+                const activeAct = gameData.acts.find(a => a.id === state.currentAct);
+                if (activeAct) document.documentElement.style.setProperty('--bg-gradient', activeAct.bgVar);
+            }
+
+            window.scrollTo(0, 0);
+
+            switch (state.currentScreen) {
+                case 'menu': renderMenu(); break;
+                case 'board': renderBoard(); break;
+                case 'letter': renderLetter(); break;
+                case 'mystery': renderMystery(); break;
+                case 'emptyEnvelope': renderEmptyEnvelope(); break;
+                case 'ending': renderEnding(); break;
+            }
+        }
+
+        function renderMenu() {
+            const hasSave = state.completedLetters.length > 0;
+            const currentYear = new Date().getFullYear();
+            
+            container.innerHTML = `
+                <div class="fade-in w-full text-center mt-8 relative z-10 pb-20">
+                    <div class="max-w-2xl mx-auto">
+                        <h3 class="text-sm font-bold tracking-[0.3em] text-amber-500/80 mb-4 uppercase">Sunset Post Office</h3>
+                        <h1 class="text-5xl md:text-6xl font-serif text-stone-100 font-extrabold tracking-wide mb-2">LETTERS TO TOMORROW</h1>
+                        <h2 class="text-xl md:text-2xl text-amber-200/90 font-serif italic mb-10">A June Solstice Story</h2>
+                        
+                        <div class="bg-stone-900/60 backdrop-blur-md border border-stone-800 p-8 rounded-xl text-left my-8 shadow-2xl">
+                            <p class="text-stone-300 text-base md:text-lg leading-relaxed mb-6">
+                                A sudden summer storm scattered our town's traditional letters to the future. Help us find the right words to fix them before the sun sets.
+                            </p>
+                            <p class="text-stone-400 italic text-base md:text-lg leading-relaxed font-serif border-l-2 border-stone-700 pl-4">
+                                "Every letter on this wall belongs to someone hoping tomorrow arrives with a little more courage, curiosity, kindness, or wonder. Before sunset, help their words find the rest of the way."
+                            </p>
+                        </div>
+
+                        <div class="flex flex-col items-center mt-10 mb-10 gap-5">
+                            ${hasSave 
+                                ? `<div class="flex flex-col sm:flex-row gap-4">
+                                       <button onclick="state.currentScreen='board'; render();" class="px-8 py-4 bg-amber-600 hover:bg-amber-500 text-stone-950 font-bold rounded shadow-lg transition-all focus:ring-2 focus:ring-amber-400">Resume Reading</button> 
+                                       <button onclick="resetGame(); state.currentScreen='board'; render();" class="px-8 py-4 bg-stone-800 hover:bg-stone-700 text-stone-200 font-bold rounded shadow transition-all">Start Over</button>
+                                   </div>` 
+                                : `<button onclick="resetGame(); state.currentScreen='board'; render();" class="px-10 py-4 bg-stone-100 hover:bg-white text-stone-900 font-bold text-lg rounded shadow-xl transition-all transform hover:-translate-y-1 focus:ring-4 focus:ring-stone-400">Open the Letters</button>`
+                            }
+                        </div>
+
+                        <div class="flex flex-col gap-3 mt-8 w-full max-w-sm mx-auto">
+                            <button onclick="openCreatorLetter()" class="px-6 py-3.5 bg-stone-900/80 backdrop-blur border border-stone-700 hover:border-amber-500/50 hover:bg-stone-800 text-stone-300 hover:text-amber-100 font-medium rounded-full shadow transition-all flex items-center justify-center gap-3 focus:outline-none focus:ring-2 focus:ring-amber-500 w-full">
+                                <span class="text-xl">💌</span> A Letter From the Creator
+                            </button>
+                            <button onclick="openHowToPlay()" class="px-6 py-3.5 bg-stone-900/80 backdrop-blur border border-stone-700 hover:border-amber-500/50 hover:bg-stone-800 text-stone-300 hover:text-amber-100 font-medium rounded-full shadow transition-all flex items-center justify-center gap-3 focus:outline-none focus:ring-2 focus:ring-amber-500 w-full">
+                                <span class="text-xl">📖</span> How to Play
+                            </button>
+                            <button onclick="openFAQ()" class="px-6 py-3.5 bg-stone-900/80 backdrop-blur border border-stone-700 hover:border-amber-500/50 hover:bg-stone-800 text-stone-300 hover:text-amber-100 font-medium rounded-full shadow transition-all flex items-center justify-center gap-3 focus:outline-none focus:ring-2 focus:ring-amber-500 w-full">
+                                <span class="text-xl">❓</span> Frequently Asked Questions
+                            </button>
+                        </div>
+                        
+                        <div class="mt-16 text-[10px] text-stone-500 tracking-widest uppercase">
+                            &copy; ${currentYear} Hemapriya Kanagala. All rights reserved.
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderBoard() {
+            const actData = gameData.acts.find(a => a.id === state.currentAct);
+            if (!actData) {
+                state.currentScreen = 'ending';
+                render();
+                return;
+            }
+
+            const completedInAct = actData.letters.filter(l => state.completedLetters.includes(l.id)).length;
+            const requiredToAdvance = Math.min(2, actData.letters.length);
+            const canAdvance = completedInAct >= requiredToAdvance;
+
+            if (completedInAct === actData.mysteryAt && !state.mysteryFragmentsSeen.includes(state.currentAct)) {
+                state.currentScreen = 'mystery';
+                render();
+                return;
+            }
+
+            if (state.currentAct === 4 && completedInAct === actData.letters.length) {
+                state.currentScreen = 'emptyEnvelope';
+                render();
+                return;
+            }
+
+            let progressMessageHtml = '';
+            if (canAdvance && state.currentAct !== 4) {
+                progressMessageHtml = `
+                    <div class="flex flex-col sm:flex-row items-center justify-between bg-stone-900/60 backdrop-blur-md border border-stone-700 p-6 rounded-xl mb-6 shadow-lg gap-6">
+                        <p class="text-stone-200 text-sm md:text-base font-medium leading-relaxed">
+                            You have done beautifully. There is no pressure here. You may step forward into the next hour whenever you are ready, or stay a little longer to help the remaining letters reach tomorrow.
+                        </p>
+                        <button onclick="advancePhase()" class="pulse-glow px-8 py-3 bg-amber-500 text-stone-950 text-sm font-bold rounded shadow transition-all hover:bg-amber-400 focus:outline-none focus:ring-4 focus:ring-amber-600 whitespace-nowrap self-end sm:self-auto">
+                            Advance Time →
+                        </button>
+                    </div>
+                `;
+            } else if (state.currentAct === 4) {
+                progressMessageHtml = `
+                    <div class="bg-stone-900/40 border border-stone-800/60 p-4 rounded-xl mb-6">
+                        <p class="text-stone-400 text-sm italic">The sun is finally touching the horizon. The Founder's letter awaits you.</p>
+                    </div>
+                `;
+            } else {
+                const lettersLeft = requiredToAdvance - completedInAct;
+                progressMessageHtml = `
+                    <div class="bg-stone-900/40 border border-stone-800/60 p-4 rounded-xl mb-6 flex items-center gap-3">
+                        <div class="w-2 h-2 rounded-full bg-amber-500/50"></div>
+                        <p class="text-stone-300 text-sm font-medium tracking-wide">Seal ${lettersLeft} more letter${lettersLeft > 1 ? 's' : ''} to allow time to pass.</p>
+                    </div>
+                `;
+            }
+
+            let sortedLetters = [...actData.letters].sort((a, b) => {
+                const aDone = state.completedLetters.includes(a.id);
+                const bDone = state.completedLetters.includes(b.id);
+                if (aDone && !bDone) return 1;
+                if (!aDone && bDone) return -1;
+                return 0;
+            });
+
+            let cardsHtml = sortedLetters.map(letter => {
+                const isCompleted = state.completedLetters.includes(letter.id);
+                return `
+                    <button ${isCompleted ? 'disabled' : `onclick="openLetter('${letter.id}')"`}
+                        class="text-left w-full p-6 rounded-xl transition-all duration-300 flex flex-col justify-between min-h-[130px]
+                        ${isCompleted ? 'bg-stone-900/30 border border-stone-800/50 text-stone-600 cursor-not-allowed opacity-60' : 'bg-stone-900/80 backdrop-blur-sm border border-stone-700 hover:border-amber-400 hover:bg-stone-800 shadow-lg focus:ring-2 focus:ring-amber-500 focus:outline-none hover:-translate-y-1'}"
+                        aria-label="${letter.name}. ${isCompleted ? 'Sealed.' : 'Read Letter.'}">
+                        <div class="w-full">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="font-bold text-xl ${isCompleted ? 'text-stone-600' : 'text-stone-100'}">${letter.name}</span>
+                                ${isCompleted 
+                                    ? '<span class="text-xs font-bold uppercase tracking-widest text-stone-500 border border-stone-800 px-2 py-1 rounded">Sealed</span>' 
+                                    : '<span class="text-xs font-bold uppercase tracking-widest text-stone-900 bg-amber-400 px-2 py-1 rounded">Read Letter</span>'}
+                            </div>
+                            <span class="text-xs font-semibold tracking-wider uppercase ${isCompleted ? 'text-stone-700' : 'text-stone-400'}">${letter.theme}</span>
+                        </div>
+                    </button>
+                `;
+            }).join('');
+
+            container.innerHTML = `
+                <div class="fade-in w-full max-w-4xl mx-auto flex flex-col min-h-[80vh]">
+                    <div class="mb-5 border-b border-stone-800 pb-4">
+                        <h2 class="text-xs font-bold uppercase tracking-[0.2em] text-stone-400 mb-1">Current Time Phase</h2>
+                        <h3 class="text-4xl font-serif font-bold text-stone-100">${actData.time}</h3>
+                    </div>
+                    
+                    ${progressMessageHtml}
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 flex-grow content-start pb-12">
+                        ${cardsHtml}
+                    </div>
+                </div>
+            `;
+        }
+
+        function advancePhase() {
+            state.currentAct++;
+            saveState();
+            render();
+        }
+
+        let activeLetterId = null;
+        function openLetter(id) {
+            activeLetterId = id;
+            state.currentScreen = 'letter';
+            render();
+        }
+
+        function renderLetter() {
+            const actData = gameData.acts.find(a => a.id === state.currentAct);
+            const letter = actData.letters.find(l => l.id === activeLetterId);
+            const isFounder = letter.id === 'c10';
+
+            const formattedText = isFounder 
+                ? letter.text 
+                : `${letter.text} <span class="border-b-2 border-dashed border-stone-400 text-transparent px-8">____________</span>`;
+
+            let interfaceHtml = '';
+
+            if (isFounder) {
+                interfaceHtml = `
+                    <div class="bg-stone-900/60 backdrop-blur-md border border-stone-800 p-6 md:p-8 rounded-xl shadow-xl mt-4 flex justify-end">
+                        <button onclick="completeLetter(' ')" class="px-8 py-3.5 bg-stone-100 hover:bg-white text-stone-900 font-bold rounded shadow-lg transition-all focus:ring-4 focus:ring-stone-400">
+                            Done with reading. Move forward.
+                        </button>
+                    </div>
+                `;
+            } else {
+                let optionsHtml = letter.options.map((opt, idx) => `
+                    <button onclick="completeLetter('${opt.replace(/'/g, "\\'")}')" class="w-full text-left p-5 rounded bg-stone-900 border border-stone-700 hover:border-amber-400 hover:bg-stone-800 transition-all focus:ring-2 focus:ring-amber-500 focus:outline-none flex gap-4 shadow-sm group">
+                        <span class="text-stone-200 text-base font-medium flex-1">${opt}</span>
+                    </button>
+                `).join('');
+
+                interfaceHtml = `
+                    <div class="bg-stone-900/60 backdrop-blur-md border border-stone-800 p-6 md:p-8 rounded-xl shadow-xl mt-4">
+                        <h4 class="text-xs uppercase tracking-widest font-bold text-stone-400 mb-4">Choose the phrasing that feels right</h4>
+                        <div class="space-y-3">
+                            ${optionsHtml}
+                        </div>
+                        
+                        <div class="mt-8 pt-6 border-t border-stone-800/80">
+                            <h4 class="text-xs uppercase tracking-widest font-bold text-stone-400 mb-3">Or leave your own thoughts</h4>
+                            <p class="text-sm text-stone-300 font-serif italic mb-5 leading-relaxed">
+                                If these choices do not quite capture what you wish to say, that is entirely okay. Sometimes the truest sentiments cannot be chosen from a list. They must be written by you. Listen to your heart, and leave your own words below.
+                            </p>
+                            <textarea id="custom-letter-text" rows="3" class="w-full bg-stone-950/80 border border-stone-700 rounded-lg p-4 text-stone-200 placeholder-stone-600 font-serif focus:border-amber-500 focus:ring-1 focus:ring-amber-500 focus:outline-none transition-all resize-none shadow-inner" placeholder="...write what feels true..."></textarea>
+                            <div class="flex justify-end mt-4">
+                                <button onclick="submitCustomLetter()" class="px-6 py-2.5 bg-stone-800 hover:bg-stone-700 border border-stone-700 text-stone-200 text-sm font-bold rounded shadow transition-all focus:ring-2 focus:ring-amber-500">
+                                    Seal These Words
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            container.innerHTML = `
+                <div class="fade-in max-w-3xl mx-auto w-full flex flex-col gap-6 pb-12">
+                    <button onclick="state.currentScreen='board'; render();" class="self-start text-xs uppercase font-bold tracking-widest text-stone-400 hover:text-stone-100 flex items-center gap-2 transition-colors focus:outline-none">
+                        ← Return to Desk
+                    </button>
+                    
+                    <div class="paper-card p-8 md:p-12 rounded shadow-2xl">
+                        <div class="text-stone-500 font-bold text-xs uppercase tracking-widest mb-6 pb-2 border-b border-stone-200 inline-block">${letter.theme}</div>
+                        
+                        <div class="text-xl md:text-2xl leading-relaxed text-stone-900 font-serif font-medium mb-6 whitespace-pre-line">
+                            ${formattedText}
+                        </div>
+
+                        ${letter.note ? `<div class="mt-8 text-sm text-stone-600 bg-stone-100 p-4 rounded border border-stone-200 font-medium italic">${letter.note}</div>` : ''}
+                    </div>
+
+                    ${interfaceHtml}
+                </div>
+            `;
+        }
+
+        function submitCustomLetter() {
+            const ta = document.getElementById('custom-letter-text');
+            if (ta && ta.value.trim() !== '') {
+                completeLetter("..." + ta.value.trim());
+            }
+        }
+
+        function completeLetter(chosenText) {
+            const actData = gameData.acts.find(a => a.id === state.currentAct);
+            const letter = actData.letters.find(l => l.id === activeLetterId);
+            
+            state.completedLetters.push(activeLetterId);
+            
+            if (letter.id !== 'c10') {
+                state.reviewLog.push({
+                    name: letter.name,
+                    theme: letter.theme,
+                    fullText: `${letter.text} ${chosenText}`
+                });
+            }
+            
+            saveState();
+            state.currentScreen = 'board';
+            render();
+        }
+
+        function renderMystery() {
+            const actData = gameData.acts.find(a => a.id === state.currentAct);
+            
+            container.innerHTML = `
+                <div class="fade-in max-w-2xl mx-auto w-full text-center py-12">
+                    <span class="text-xs font-bold uppercase tracking-[0.2em] text-stone-400 mb-4 block">You found a torn piece of a hidden letter</span>
+                    <div class="text-2xl md:text-3xl font-serif text-amber-100 leading-relaxed italic bg-stone-900/40 p-10 rounded border border-stone-700 shadow-2xl my-8">
+                        "${actData.mysteryText}"
+                    </div>
+                    <p class="text-stone-400 text-sm mb-6 max-w-md mx-auto">It looks like a message left behind by the Postmaster who worked here before you. It has been added to your Review Book.</p>
+                    <button onclick="state.mysteryFragmentsSeen.push(state.currentAct); saveState(); state.currentScreen='board'; render();" class="mt-2 px-8 py-3 bg-stone-800 hover:bg-stone-700 text-stone-200 font-bold rounded transition-all border border-stone-600 shadow focus:ring-2 focus:ring-amber-500">
+                        Continue Working
+                    </button>
+                </div>
+            `;
+        }
+
+        function renderEmptyEnvelope() {
+            container.innerHTML = `
+                <div class="fade-in max-w-2xl mx-auto w-full bg-stone-900/90 backdrop-blur border border-stone-700 p-8 md:p-12 rounded-xl shadow-2xl relative">
+                    <div class="mb-8 border-b border-stone-700 pb-4">
+                        <h3 class="text-3xl font-serif text-amber-200 font-bold mb-2">THE EMPTY ENVELOPE</h3>
+                        <p class="text-xs text-stone-400 uppercase tracking-widest font-bold">Recipient: Whoever stands here at sunset</p>
+                    </div>
+                    <p class="text-lg text-stone-300 mb-8 leading-relaxed">
+                        Before we close for the night, is there anything you would like Tomorrow to know? Take your time. There is no right answer. There is no wrong answer. Just write what is true today.
+                    </p>
+                    
+                    <div class="relative">
+                        <textarea id="custom-note" rows="5" class="w-full bg-stone-950 border border-stone-800 rounded p-4 text-stone-100 font-serif text-lg focus:border-amber-400 focus:ring-1 focus:ring-amber-400 focus:outline-none transition-all resize-none shadow-inner" placeholder="Your note to tomorrow..."></textarea>
+                    </div>
+
+                    <div class="mt-8 flex flex-col sm:flex-row items-center justify-between gap-5">
+                        <p class="text-sm text-stone-400 italic">If you are feeling like not writing, we can gently skip this.</p>
+                        <div class="flex gap-4 w-full sm:w-auto justify-end">
+                            <button onclick="skipEnvelope()" class="px-6 py-3 bg-stone-800/80 border border-stone-700 hover:bg-stone-700 text-stone-300 font-bold rounded transition-all focus:ring-2 focus:ring-stone-500">
+                                Skip
+                            </button>
+                            <button onclick="finishGame()" class="px-8 py-3 bg-stone-100 hover:bg-white text-stone-900 font-bold rounded shadow-lg transition-all focus:ring-4 focus:ring-amber-400">
+                                Seal Envelope
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function skipEnvelope() {
+            state.customNote = "A quiet thought left blank for tomorrow.";
+            saveState();
+            state.currentScreen = 'ending';
+            render();
+            spawnEndingBurst();
+        }
+
+        function finishGame() {
+            const noteText = document.getElementById('custom-note').value;
+            state.customNote = noteText || "A quiet thought left blank for tomorrow.";
+            saveState();
+            state.currentScreen = 'ending';
+            render();
+            spawnEndingBurst();
+        }
+
+        function renderEnding() {
+            document.documentElement.style.setProperty('--bg-gradient', 'linear-gradient(135deg, #060814 0%, #110624 100%)');
+            const currentYear = new Date().getFullYear();
+
+            container.innerHTML = `
+                <div class="fade-in max-w-3xl mx-auto text-center relative z-20 mt-8 pb-16">
+                    <h2 class="text-5xl md:text-6xl font-serif text-amber-200 font-bold tracking-wider mb-10">NIGHTFALL</h2>
+                    
+                    <p class="text-xl md:text-2xl text-stone-200 font-serif leading-relaxed mb-12 bg-stone-900/60 p-8 rounded-xl border border-stone-800 max-w-2xl mx-auto shadow-2xl">
+                        You helped these voices reach tomorrow. The town feels lighter tonight, and tomorrow is a little brighter because you took the time to listen.
+                    </p>
+                    
+                    <div class="text-xs text-stone-400 space-y-2 uppercase tracking-[0.2em] font-bold bg-stone-950/80 py-8 px-10 rounded inline-block border border-stone-800 shadow-md mb-12">
+                        <p class="text-stone-200 text-sm tracking-widest mb-2">LETTERS TO TOMORROW</p>
+                        <p>Written by Hemapriya Kanagala</p>
+                        <p>For the June Solstice Game Jam</p>
+                        <p class="mt-6 text-amber-400">Thank you for playing.</p>
+                    </div>
+
+                    <div class="flex flex-col items-center gap-6">
+                        <button onclick="openReviewBook()" class="px-8 py-3.5 bg-stone-800/80 hover:bg-stone-700 text-stone-200 font-bold rounded-lg shadow-lg transition-all focus:ring-2 focus:ring-amber-500 border border-stone-700 hover:border-amber-500/50 flex items-center gap-3 backdrop-blur">
+                            <span class="text-xl">📖</span> Open Review Book
+                        </button>
+
+                        <button onclick="confirmPlayAgain()" class="text-xs uppercase font-bold tracking-widest text-stone-500 hover:text-stone-300 transition-colors focus:outline-none border-b border-transparent hover:border-stone-500 pb-1 mt-2">Play Again</button>
+                    </div>
+
+                    <div class="mt-20 text-[10px] text-stone-600 tracking-widest uppercase">
+                        &copy; ${currentYear} Hemapriya Kanagala. All rights reserved.
+                    </div>
+                </div>
+            `;
+        }
+
+        /* --- MODAL CONTROLS --- */
+        const modalOverlay = document.getElementById('modal-overlay');
+        const modalContent = document.getElementById('modal-content');
+
+        function openModal(html) {
+            modalContent.innerHTML = html;
+            modalOverlay.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            modalOverlay.classList.add('hidden');
+            document.body.style.overflow = '';
+        }
+
+        function confirmExit() {
+            openModal(`
+                <h3 class="text-2xl font-serif font-bold text-stone-100 mb-4">Return to Main Menu?</h3>
+                <p class="text-stone-400 text-base leading-relaxed mb-8">Your progress is safely stored. You can resume exactly where you left off.</p>
+                <div class="flex gap-4 justify-end">
+                    <button onclick="closeModal()" class="px-4 py-2 rounded text-sm font-bold text-stone-400 hover:text-stone-200 transition-colors">Cancel</button>
+                    <button onclick="state.currentScreen='menu'; render(); closeModal();" class="px-6 py-2 bg-stone-100 hover:bg-white text-stone-900 rounded text-sm font-bold transition-all shadow">Confirm Return</button>
+                </div>
+            `);
+        }
+
+        function confirmRestart() {
+            openModal(`
+                <h3 class="text-2xl font-serif font-bold text-rose-400 mb-4">Restart Journey?</h3>
+                <p class="text-stone-400 text-base leading-relaxed mb-8">This will permanently clear your completed letters and review book. Are you sure you wish to start over?</p>
+                <div class="flex gap-4 justify-end">
+                    <button onclick="closeModal()" class="px-4 py-2 rounded text-sm font-bold text-stone-400 hover:text-stone-200 transition-colors">Cancel</button>
+                    <button onclick="resetGame(); closeModal();" class="px-6 py-2 bg-rose-900 text-rose-100 hover:bg-rose-800 rounded text-sm font-bold transition-all">Restart Story</button>
+                </div>
+            `);
+        }
+
+        function confirmPlayAgain() {
+            openModal(`
+                <h3 class="text-2xl font-serif font-bold text-amber-300 mb-4">Start a New Journey?</h3>
+                <p class="text-stone-400 text-base leading-relaxed mb-8">This will gently clear all currently saved letters and your review book, allowing you to experience the journey fresh. Are you sure you want to proceed?</p>
+                <div class="flex gap-4 justify-end">
+                    <button onclick="closeModal()" class="px-4 py-2 rounded text-sm font-bold text-stone-400 hover:text-stone-200 transition-colors">Cancel</button>
+                    <button onclick="resetGame(); closeModal();" class="px-6 py-2 bg-amber-600 hover:bg-amber-500 text-stone-950 rounded text-sm font-bold transition-all shadow">Yes, Start Afresh</button>
+                </div>
+            `);
+        }
+
+        function openHowToPlay() {
+            openModal(`
+                <h3 class="text-3xl font-serif text-amber-200 font-bold mb-8 text-center border-b border-stone-800 pb-6">How to Play: Letters to Tomorrow</h3>
+                <div class="space-y-6 text-stone-300 font-serif leading-relaxed text-lg px-2 md:px-6">
+                    <p>Welcome to the Post Office. I know this is a very gentle, easy game to understand. But I never know if someone might need a little extra guidance, and I wanted to make sure to write this down because even if this detailed guide helps just one person feel more comfortable, it is entirely worth it.</p>
+                    
+                    <h4 class="text-xl font-bold text-amber-100 mt-8 mb-2 border-b border-stone-800 pb-2">The Short Version (TL;DR)</h4>
+                    <p>If you just want the quick basics so you can jump right in, here is everything you need to know:</p>
+                    <ul class="list-disc list-inside text-stone-400 my-4 space-y-2 ml-4">
+                        <li><strong class="text-stone-200">The Goal:</strong> You are a Postmaster helping to finish letters that lost their final words in a storm.</li>
+                        <li><strong class="text-stone-200">The Flow:</strong> Click a letter on your desk, read it, and select the ending that feels right to you. If none of them fit, you can type your own ending.</li>
+                        <li><strong class="text-stone-200">Moving Forward:</strong> Once you finish at least two letters, a button will appear allowing you to advance time to the next part of the day. You do not have to finish every letter to move forward.</li>
+                        <li><strong class="text-stone-200">Your Privacy (Important):</strong> This game uses "local storage." In plain terms, that means everything you write and every choice you make stays right on your own phone or computer. Nothing is ever sent to a server. No one else will ever see your words. Your thoughts are completely safe, secure, and private.</li>
+                    </ul>
+
+                    <h4 class="text-xl font-bold text-amber-100 mt-10 mb-2 border-b border-stone-800 pb-2">The Detailed Guide</h4>
+                    <p>If you prefer a full walkthrough of what to expect during your shift, here is a step-by-step look at how the game works.</p>
+
+                    <div class="space-y-4 text-stone-400 mt-4">
+                        <p><strong class="text-amber-200/80">1. The Sorting Desk:</strong> When you begin your shift, you will see a desk with several unfinished letters. The background color reflects the current time of day, starting with Morning Light. You will also see a tracker telling you how many letters you need to complete to allow time to pass.</p>
+                        
+                        <p><strong class="text-amber-200/80">2. Reading and Sealing Letters:</strong> Click on any available letter to open it. Take your time reading the story. At the bottom, you will see a few choices to complete the missing sentence. Click the one that speaks to you. If your heart is telling you to say something else, simply type your own words into the text box below and click the button to seal it.</p>
+                        
+                        <p><strong class="text-amber-200/80">3. Advancing Time:</strong> You do not have to finish every single letter on the desk. Once you help at least two voices in a phase, you have done enough. A button will appear giving you a choice: you can either move forward into the next phase of the day, or you can stay at your desk a little longer to finish the remaining letters. There is absolutely no pressure. Move at your own pace.</p>
+                        
+                        <p><strong class="text-amber-200/80">4. Finding Mystery Fragments:</strong> As you work, you might randomly uncover a torn piece of a hidden letter. These are small notes left behind by the person who worked this desk before you. When you find one, simply acknowledge it, and it will be safely tucked away in your Review Book for you to read fully assembled at the end of the day.</p>
+                        
+                        <p><strong class="text-amber-200/80">5. The Sunset Phase:</strong> When you finally reach Sunset, the regular letters will be gone. Instead, you will find "The Founder's Letter." This is a historical note left for you to read. There are no choices to make and nothing to fill in. It is simply a moment for reflection.</p>
+                        
+                        <p><strong class="text-amber-200/80">6. The Empty Envelope:</strong> Before you leave the desk for the night, you are given an empty envelope addressed to Tomorrow. Here, you can type a personal note about whatever is on your mind. If you are feeling tired or simply do not want to write, there is a "Skip" button. It will seal a blank envelope with a peaceful thought and take you directly to the ending.</p>
+                        
+                        <p><strong class="text-amber-200/80">7. The Review Book:</strong> At the very end of the game, you will see a button to open your Review Book. This is a beautiful journal that holds every letter you completed, the personal note you wrote to Tomorrow, and the hidden fragments you gathered along the way.</p>
+                        
+                        <p><strong class="text-amber-200/80">8. A Note on Your Privacy:</strong> I want to emphasize this one more time because it is so important. When you play this game, everything happens locally on your device. Whether you are typing a custom ending to a letter or pouring your feelings into the final envelope, none of that data ever leaves your screen. There are no servers collecting your answers, and I cannot read what you write. I built it this way specifically so you can play without any tension, worry, or fear of judgment. This is your quiet space.</p>
+                    </div>
+                </div>
+                <div class="flex justify-end mt-10 pt-6 border-t border-stone-800">
+                    <button onclick="closeModal()" class="px-8 py-3 bg-stone-800 hover:bg-stone-700 rounded text-sm font-bold uppercase tracking-wider text-stone-200 transition-colors focus:ring-2 focus:ring-amber-500">Close Guide</button>
+                </div>
+            `);
+        }
+
+        function openFAQ() {
+            openModal(`
+                <h3 class="text-3xl font-serif text-amber-200 font-bold mb-8 text-center border-b border-stone-800 pb-6">Welcome to the Post Office: Frequently Asked Questions</h3>
+                <div class="space-y-6 text-stone-300 font-serif leading-relaxed text-lg px-2 md:px-6">
+                    
+                    <div>
+                        <p class="font-bold text-amber-100 mb-1">What exactly is Letters to Tomorrow?</p>
+                        <p class="text-stone-400">It is a peaceful, narrative web game about slowing down, finding the right words, and helping unfinished letters reach their destination before the sun sets on the June Solstice.</p>
+                    </div>
+
+                    <div>
+                        <p class="font-bold text-amber-100 mb-1">How do I win? Is there a timer?</p>
+                        <p class="text-stone-400">There is no winning, losing, or rushing here. You move entirely at your own pace. There is no countdown clock. The goal is simply to experience the stories, help the writers find their voices, and perhaps leave a piece of your own story behind.</p>
+                    </div>
+
+                    <div>
+                        <p class="font-bold text-amber-100 mb-1">Do I have to finish every single letter on the desk?</p>
+                        <p class="text-stone-400">Not at all. Once you help at least two voices in a given time phase, you will be given the gentle option to advance time. You can choose to stay and help every single letter, or you can move forward when you feel emotionally ready. There is absolutely no pressure.</p>
+                    </div>
+
+                    <div>
+                        <p class="font-bold text-amber-100 mb-1">What happens if none of the pre-written choices feel right to me?</p>
+                        <p class="text-stone-400">Listen to your heart. At the bottom of every active letter, there is a dedicated space to write your own thoughts. If the provided choices do not capture what you wish to say, you can type whatever feels truest to you, and those words will be sealed into the letter.</p>
+                    </div>
+
+                    <div>
+                        <p class="font-bold text-amber-100 mb-1">I found a fragment while playing. What does that mean?</p>
+                        <p class="text-stone-400">As you sort through the mail, you might uncover torn pieces of an old note wedged in the desk. These are fragments of a hidden letter left behind by the Postmaster who sat at this desk before you. As you find them, they will automatically assemble themselves at the bottom of your Review Book so you can read the full message at the end.</p>
+                    </div>
+
+                    <div>
+                        <p class="font-bold text-amber-100 mb-1">Who is The Founder?</p>
+                        <p class="text-stone-400">The Founder is the original Postmaster who started this solstice tradition long ago. Their letter, which appears right at sunset, is not a puzzle to solve. It is simply a historical archive and a reflection on time, change, and the purpose of the festival, left specifically for you to read before your shift ends.</p>
+                    </div>
+
+                    <div>
+                        <p class="font-bold text-amber-100 mb-1">Are these real letters from real people?</p>
+                        <p class="text-stone-400">While the characters themselves are fictional, the letters were heavily inspired by the very real, ordinary, and beautiful moments we all share. They were written to reflect universal feelings of courage, legacy, subtle kindness, and new beginnings.</p>
+                    </div>
+
+                    <div>
+                        <p class="font-bold text-amber-100 mb-1">What happens to the empty envelope I fill out at the end of the game?</p>
+                        <p class="text-stone-400">The letter you write to Tomorrow is sealed directly into your personal Review Book. I designed this game using what is known as local storage. In everyday terms, this means absolutely everything you write stays directly on your own device. Your words are never sent to a server, and nobody else will ever read them. Whether you write your own responses to the town's letters because the choices did not fit, or you pour your heart into the final personal letter, those words are completely yours. I built it this way so you can play freely, without any tension or worry. Your privacy truly matters to me, and this space belongs exclusively to you.</p>
+                    </div>
+
+                    <div>
+                        <p class="font-bold text-amber-100 mb-1">If I do not feel like writing a personal letter at the end, am I stuck?</p>
+                        <p class="text-stone-400">No, you are never stuck. If you do not have the energy or desire to write your own note, there is a Skip button readily available. It will seal a blank envelope with a peaceful thought and gently move you to the beautiful ending screen.</p>
+                    </div>
+
+                    <div>
+                        <p class="font-bold text-amber-100 mb-1">How do I save my progress? Can I leave and come back?</p>
+                        <p class="text-stone-400">The game autosaves your progress seamlessly in the background. If you need to close the tab, step away, or return the next day, your desk and your phase of the day will be exactly as you left them.</p>
+                    </div>
+
+                    <div>
+                        <p class="font-bold text-amber-100 mb-1">Why does the background screen change color?</p>
+                        <p class="text-stone-400">The colors reflect the passing of time throughout the longest day of the year. As you complete letters and advance the phases, the sky shifts from deep morning indigo, to midday amber, to afternoon gold, and finally settles into a deep, peaceful sunset purple.</p>
+                    </div>
+
+                    <div>
+                        <p class="font-bold text-amber-100 mb-1">I am done reading my Review Book. What happens if I click Play Again?</p>
+                        <p class="text-stone-400">Clicking Play Again will clear your current journal, fragments, and completed letters, allowing you to experience the journey completely fresh from the morning light. Because this erases your current saves, the game will always show you a confirmation screen to double-check before anything is actually wiped.</p>
+                    </div>
+
+                    <div>
+                        <p class="font-bold text-amber-100 mb-1">Why isn't there any background music playing?</p>
+                        <p class="text-stone-400">I wanted to create a space that feels like a calm, undisturbed desk at the end of the day. The silence is intentional. It gives you the breathing room to think, reflect, and hear your own inner voice as you read and write.</p>
+                    </div>
+
+                    <div>
+                        <p class="font-bold text-amber-100 mb-1">Can I play this on my phone?</p>
+                        <p class="text-stone-400">Yes. The layout is fully responsive. It is designed to be a cozy, highly readable, and accessible experience on mobile phones, tablets, and desktop computers alike.</p>
+                    </div>
+
+                    <div class="mt-10 pt-8 border-t border-stone-800">
+                        <h4 class="font-bold text-xl text-amber-200 mb-4">A Final Note</h4>
+                        <p class="text-stone-400">I have tried to gather as many questions as I could possibly think of, but I completely understand that there will always be something I missed. Everyone experiences stories differently, and new questions will inevitably come up. Later on, I plan to add a simple form here so your questions can reach me directly. Until then, thank you for spending your time at the sunset desk.</p>
+                    </div>
+
+                </div>
+                <div class="flex justify-end mt-10 pt-6 border-t border-stone-800">
+                    <button onclick="closeModal()" class="px-8 py-3 bg-stone-800 hover:bg-stone-700 rounded text-sm font-bold uppercase tracking-wider text-stone-200 transition-colors focus:ring-2 focus:ring-amber-500">Close FAQ</button>
+                </div>
+            `);
+        }
+
+        function openReviewBook() {
+            if (state.reviewLog.length === 0 && (!state.customNote || state.customNote === "A quiet thought left blank for tomorrow.") && state.mysteryFragmentsSeen.length === 0) {
+                openModal(`
+                    <h3 class="text-2xl font-serif text-amber-200 font-bold mb-4">The Review Book</h3>
+                    <p class="text-stone-400 text-sm italic mb-8">The book is currently empty. Complete letters to see them gathered here.</p>
+                    <div class="flex justify-end">
+                        <button onclick="closeModal()" class="px-6 py-2 bg-stone-800 hover:bg-stone-700 rounded text-xs font-bold uppercase tracking-wider text-stone-200 transition-colors">Close</button>
+                    </div>
+                `);
+                return;
+            }
+
+            let logsHtml = state.reviewLog.map(log => `
+                <div class="mb-6 pb-6 border-b border-stone-800 last:border-0">
+                    <div class="flex justify-between items-baseline mb-3">
+                        <span class="font-bold text-amber-100 text-lg">${log.name}</span>
+                        <span class="text-[10px] font-bold uppercase tracking-widest text-stone-500">${log.theme}</span>
+                    </div>
+                    <p class="text-stone-300 italic text-base leading-relaxed font-serif bg-stone-900/50 p-5 rounded border border-stone-800">${log.fullText}</p>
+                </div>
+            `).join('');
+
+            if (state.customNote && state.customNote !== "A quiet thought left blank for tomorrow.") {
+                logsHtml += `
+                    <div class="mb-6 pb-6 border-b border-stone-800 last:border-0 mt-6 pt-6 border-t border-stone-700/50">
+                        <div class="flex justify-between items-baseline mb-3">
+                            <span class="font-bold text-amber-400 text-lg">Your Personal Note</span>
+                            <span class="text-[10px] font-bold uppercase tracking-widest text-stone-500">Addressed to Tomorrow</span>
+                        </div>
+                        <p class="text-stone-200 italic text-base leading-relaxed font-serif bg-stone-800/50 p-5 rounded border border-stone-700">${state.customNote}</p>
+                    </div>
+                `;
+            }
+
+            if (state.mysteryFragmentsSeen.length > 0) {
+                let assembledFragment = state.mysteryFragmentsSeen.sort((a, b) => a - b).map(actId => {
+                    const act = gameData.acts.find(a => a.id === actId);
+                    return act ? act.mysteryText : "";
+                }).join(" ");
+
+                logsHtml += `
+                    <div class="mb-6 pb-6 mt-6 pt-6 border-t border-stone-700/50">
+                        <div class="flex justify-between items-baseline mb-3">
+                            <span class="font-bold text-stone-400 text-lg">Recovered Fragments</span>
+                            <span class="text-[10px] font-bold uppercase tracking-widest text-stone-600">From a Predecessor</span>
+                        </div>
+                        <p class="text-stone-400 italic text-sm leading-relaxed font-serif p-5 rounded border border-stone-800 bg-stone-950/40">"${assembledFragment}"</p>
+                    </div>
+                `;
+            }
+
+            openModal(`
+                <div class="flex justify-between items-center mb-6 border-b border-stone-800 pb-4">
+                    <h3 class="text-2xl font-serif text-amber-200 font-bold">The Review Book</h3>
+                    <button onclick="closeModal()" class="text-stone-500 hover:text-stone-200 text-3xl font-light focus:outline-none">&times;</button>
+                </div>
+                <div class="max-h-[60vh] overflow-y-auto pr-4 custom-scroll">
+                    ${logsHtml}
+                </div>
+            `);
+        }
+
+        function openCreatorLetter() {
+            openModal(`
+                <h3 class="text-3xl font-serif text-amber-200 font-bold mb-8 text-center border-b border-stone-800 pb-6">A Letter From the Creator</h3>
+                <div class="space-y-5 text-stone-300 font-serif leading-relaxed text-lg px-2 md:px-6">
+                    <p>Thank you for spending part of your day here.</p>
+                    <p>The idea for this game came from a simple thought: most of us carry words we never quite find the right moment to say.</p>
+                    <p>Sometimes they are hopes.</p>
+                    <p>Sometimes they are reminders.</p>
+                    <p>Sometimes they are things we want our future selves to remember when life becomes busy, difficult, or simply different.</p>
+                    <p>The June Solstice has always fascinated me because it marks a turning point. The longest day eventually becomes evening. A season changes. Time moves forward whether we are ready or not.</p>
+                    <p>While making this game, I kept thinking about how every person is carrying their own story. Most of those stories are invisible. We pass each other every day without knowing what someone is hoping for, worrying about, building, healing from, or dreaming about.</p>
+                    <p>The letters in this town were written with that idea in mind.</p>
+                    <p>They are not about extraordinary people.</p>
+                    <p>They are about ordinary moments that often matter more than we realize.</p>
+                    
+                    <ul class="list-disc list-inside text-stone-400 my-6 space-y-2 ml-4">
+                        <li>A small act of kindness.</li>
+                        <li>A new beginning.</li>
+                        <li>A question that changes the way we see something.</li>
+                        <li>The courage to be ourselves.</li>
+                        <li>The people who stay.</li>
+                        <li>The things we quietly carry forward.</li>
+                    </ul>
+
+                    <p>If any of these letters felt familiar, that is probably because they were inspired by experiences many of us share.</p>
+                    <p>And if you chose to write your own letter at the end, thank you for trusting this little game with a piece of your story.</p>
+                    <p>I hope that when you leave here, you take a moment to notice the people around you, the season you are in, and the things that make today worth remembering.</p>
+                    <p>The longest day eventually ends.</p>
+                    <p>What we carry forward is up to us.</p>
+                    
+                    <div class="mt-10 pt-8 border-t border-stone-800 text-amber-100/90 italic">
+                        <p>With gratitude,</p>
+                        <p class="mt-2 text-2xl font-bold">Hemapriya Kanagala</p>
+                        <p class="text-xs font-sans not-italic tracking-wider text-stone-500 uppercase mt-2">Creator of Letters to Tomorrow</p>
+                    </div>
+                </div>
+                <div class="flex justify-end mt-10 pt-6 border-t border-stone-800">
+                    <button onclick="closeModal()" class="px-8 py-3 bg-stone-800 hover:bg-stone-700 rounded text-sm font-bold uppercase tracking-wider text-stone-200 transition-colors focus:ring-2 focus:ring-amber-500">Close Letter</button>
+                </div>
+            `);
+        }
+
+        modalOverlay.addEventListener('click', (e) => {
+            if (e.target === modalOverlay) closeModal();
+        });
+
+        init();
+    </script>
+</body>
+</html>
