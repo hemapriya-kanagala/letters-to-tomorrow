@@ -6,7 +6,7 @@
 
 *A narrative web game about unfinished letters, quiet moments, and the things we choose to carry into tomorrow.*
 
-[🎮 Play the Game](YOUR_GAME_LINK) • [📝 DEV Article](YOUR_DEV_ARTICLE_LINK)
+[🎮 Play the Game](https://letters-to-tomorrow-game.vercel.app/) • [📝 DEV Article](https://dev.to/hemapriya_kanagala/letters-to-tomorrow-a-june-solstice-game-about-the-things-we-carry-into-tomorrow-1lnf)
 
 </div>
 
@@ -54,7 +54,7 @@ This one belongs to you.
 
 At its heart, Letters to Tomorrow is a game about helping people complete unfinished thoughts.
 
-Players move through four phases of the solstice — Morning Light, Midday Sun, Afternoon Gold, and Sunset Glow — meeting different characters and stories along the way. Every letter presents a missing final thought that can be completed through multiple choices or through words written entirely by the player.
+Players move through four phases of the solstice - Morning Light, Midday Sun, Afternoon Gold, and Sunset Glow - meeting different characters and stories along the way. Every letter presents a missing final thought that can be completed through multiple choices or through words written entirely by the player.
 
 Progression is intentionally flexible. Players only need to help a minimum number of voices before moving into the next phase of the day, but they are always free to stay longer and complete additional letters if they wish. Only the letters they choose to finish are sealed and carried forward into tomorrow.
 
@@ -192,11 +192,9 @@ This README focuses on the game itself, but there is a much larger story behind 
 
 If you would like to learn more about the design process, the June Solstice inspiration, the tribute to Alan Turing, how Google AI was used during development, the real-life story behind Hema's letter, and the challenge of creating and narrating the demo video, you can read the full write-up below.
 
-👉 **DEV Article**
-YOUR_DEV_ARTICLE_LINK
+👉 **[DEV Article](https://dev.to/hemapriya_kanagala/letters-to-tomorrow-a-june-solstice-game-about-the-things-we-carry-into-tomorrow-1lnf)**
 
-👉 **Play the Game**
-YOUR_GAME_LINK
+👉 **[Play the Game](https://letters-to-tomorrow-game.vercel.app/)**
 
 ---
 
@@ -208,4 +206,4 @@ If you would like to share feedback, discuss the letters, suggest new stories, o
 
 I would love to hear which parts of the game resonated with you and what you would like to see improved in future versions.
 
-Thank you for visiting the sunset desk.
+Thank you!
